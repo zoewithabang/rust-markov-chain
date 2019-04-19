@@ -1,7 +1,9 @@
 extern crate dotenv;
+#[macro_use]
 extern crate mysql;
 
 use dotenv::dotenv;
+use std::char;
 use std::env;
 
 #[derive(PartialEq)]
@@ -42,31 +44,51 @@ fn get_stored_messages(user_ids: Vec<String>, message_count: u32, markov_type: M
         MarkovType::Server => println!("Server"),
     };
 
-    let db = format!("mysql://{}:{}@{}:{}/{}",
-        env::var("dbuser").unwrap(),
-        env::var("dbpassword").unwrap(),
-        env::var("dbaddress").unwrap(),
-        env::var("dbport").unwrap(),
-        env::var("dbdatabase").unwrap());
+    let db = get_database_string();
 
     println!("{}", db);
 
     let pool = mysql::Pool::new(db).unwrap();
 
-    let users = pool.prep_exec("SELECT * from users", ())
-        .map(|result| {
-            result.map(|x| x.unwrap())
-                .map(|row| {
-                    let (id, tracked, permission_rank) = mysql::from_row(row);
-                    User {
-                        id,
-                        tracked,
-                        permission_rank
-                    }
-                }).collect::<Vec<User>>()
-        }).unwrap();
+    let mut query = String::from("SELECT * FROM users WHERE");
+    let mut params: Vec<mysql::Value> = Vec::with_capacity(user_ids.len());
+
+    for (i, user_id) in user_ids.iter().enumerate() {
+        query.push_str(" id = :id");
+        query.push(char::from_digit(i as u32, 10).unwrap());
+
+        if i != user_ids.len() - 1 {
+            query.push_str(" OR");
+        }
+
+        params.push(user_id.into())
+    }
+
+    let users = pool.prepare(query)
+        .unwrap()
+        .execute(params)
+        .unwrap()
+        .map(|x| x.unwrap())
+            .map(|row| {
+                let (id, tracked, permission_rank) = mysql::from_row(row);
+                User {
+                    id,
+                    tracked,
+                    permission_rank
+                }
+            })
+        .collect::<Vec<User>>();
 
     for user in users {
         println!("{:?}", user);
     }
+}
+
+fn get_database_string() -> String {
+    format!("mysql://{}:{}@{}:{}/{}",
+            env::var("dbuser").unwrap(),
+            env::var("dbpassword").unwrap(),
+            env::var("dbaddress").unwrap(),
+            env::var("dbport").unwrap(),
+            env::var("dbdatabase").unwrap())
 }
