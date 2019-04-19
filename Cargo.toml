@@ -6,3 +6,4 @@ edition = "2018"
 
 [dependencies]
 dotenv = "0.13.0"
+mysql = "15.1.0"
