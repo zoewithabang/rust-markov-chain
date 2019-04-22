@@ -1,18 +1,9 @@
-use chrono::prelude::*;
 use dotenv;
 
 #[derive(PartialEq)]
 pub enum MarkovType {
     Users,
     Server
-}
-
-#[derive(Debug, PartialEq, Eq)]
-pub struct Message {
-    id: String,
-    user_id: String,
-    content: String,
-    timestamp: NaiveDateTime
 }
 
 pub mod data;
@@ -28,4 +19,8 @@ fn main() {
     dotenv::dotenv().ok();
 
     let messages = data::get_stored_messages(user_ids);
+
+    for message in messages {
+        println!("{:?}", message);
+    }
 }
