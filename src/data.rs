@@ -10,7 +10,7 @@ struct MessageSearchOptions {
 pub fn get_stored_messages(user_ids: Vec<String>) -> Vec<String> {
     const MARKOV_TYPE: crate::MarkovType = crate::MarkovType::Users;
 
-    let max_message_count: u32 = env::var("max_message_count").unwrap().parse::<u32>().unwrap();;
+    let max_message_count = env::var("max_message_count").unwrap().parse::<u32>().unwrap();
     let pool = mysql::Pool::new(get_database_string()).unwrap();
 
     match MARKOV_TYPE {

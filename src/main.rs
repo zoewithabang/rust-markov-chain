@@ -7,6 +7,8 @@ pub enum MarkovType {
 }
 
 pub mod data;
+pub mod markov;
+pub mod markov_table;
 
 fn main() {
     let user_ids: Vec<String> = vec!["83126901098414080".to_string(),
@@ -15,12 +17,15 @@ fn main() {
                                      "83739773033775104".to_string(),
                                      "84246523071725568".to_string(),
                                      "89718706225041408".to_string()];
+    let seed: Vec<String> = vec![];
 
     dotenv::dotenv().ok();
 
     let messages = data::get_stored_messages(user_ids);
 
-    for message in messages {
+    for message in &messages {
         println!("{:?}", message);
     }
+
+    let output = markov::generate_markov_message_with_seed(messages, seed);
 }
