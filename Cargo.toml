@@ -5,7 +5,9 @@ authors = ["zoewithabang <zoewithabang@gmail.com>"]
 edition = "2018"
 
 [dependencies]
+chrono = "0.4.6"
 dotenv = "0.13.0"
+indexmap = "1.0.2"
 mysql = "16.0.0"
 rand = "0.6.5"
 unicase = "2.3.0"
